@@ -103,9 +103,9 @@ class MedicalAlertPage extends StatelessWidget {
                         // MaterialPageRoute(builder: (context) => PatientInfoPage ()),
                         //   MaterialPageRoute(builder: (context) => NurseRegistrationPage ()),
                         //   MaterialPageRoute(builder: (context) => HRRegistrationPage()),
-                        //   MaterialPageRoute(builder: (context) =>   NurseLoginPage()),
-                        //   MaterialPageRoute(builder: (context) =>   ProfilePage(nurseId:'12365')),
-                          MaterialPageRoute(builder: (context) =>   NurseHomePage(fullName: 'abeer',nurseId:"")),
+                          MaterialPageRoute(builder: (context) =>   NurseLoginPage()),
+
+                        //   MaterialPageRoute(builder: (context) =>   NurseHomePage(fullName: 'abeer',nurseId:"")),
 
 
 

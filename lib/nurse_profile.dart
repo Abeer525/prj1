@@ -12,26 +12,39 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late Future<String> _futureEmail;
+  late Future<Map<String, dynamic>> _futureNurseDetails;
 
   @override
   void initState() {
     super.initState();
-    _futureEmail = fetchEmail();
+    _futureNurseDetails = fetchNurseDetails();
   }
 
-  Future<String> fetchEmail() async {
-    final url = Uri.parse('http://192.168.1.2:5000/api/nurse/email/${widget.nurseId}');
+  Future<Map<String, dynamic>> fetchNurseDetails() async {
+    final baseUrl = 'http://192.168.1.2:5000/api/nurse';
+    final List<Future<http.Response>> requests = [
+      http.get(Uri.parse('$baseUrl/email/${widget.nurseId}')),
+      http.get(Uri.parse('$baseUrl/fullname/${widget.nurseId}')),
+      http.get(Uri.parse('$baseUrl/phonenumber/${widget.nurseId}')),
+      http.get(Uri.parse('$baseUrl/dateofbirth/${widget.nurseId}')),
+    ];
 
     try {
-      final response = await http.get(url);
+      final responses = await Future.wait(requests);
 
-      if (response.statusCode == 200) {
-        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        return jsonResponse['email'];
-      } else {
-        throw Exception('Failed to load nurse email - ${response.statusCode}');
+      // Parse responses
+      Map<String, dynamic> nurseDetails = {};
+
+      for (var response in responses) {
+        if (response.statusCode == 200) {
+          Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+          nurseDetails.addAll(jsonResponse);
+        } else {
+          throw Exception('Failed to load nurse details - ${response.statusCode}');
+        }
       }
+
+      return nurseDetails;
     } catch (e) {
       throw Exception('Failed to connect to the server: $e');
     }
@@ -44,8 +57,8 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text('Nurse Profile'),
       ),
       body: Center(
-        child: FutureBuilder<String>(
-          future: _futureEmail,
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _futureNurseDetails,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator();
@@ -53,7 +66,17 @@ class _ProfilePageState extends State<ProfilePage> {
               return Text('Error: ${snapshot.error}');
             }
 
-            return Text('Nurse Email: ${snapshot.data}');
+            Map<String, dynamic>? nurseDetails = snapshot.data;
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Nurse Email: ${nurseDetails?["email"]}'),
+                Text('Full Name: ${nurseDetails?["fullName"]}'),
+                Text('Phone Number: ${nurseDetails?["phoneNumber"]}'),
+                Text('Date of Birth: ${nurseDetails?["dateOfBirth"]}'),
+              ],
+            );
           },
         ),
       ),
