@@ -2,19 +2,18 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class NurseRegistrationPage extends StatefulWidget {
+class HRRegistrationPage extends StatefulWidget {
   @override
-  _NurseRegistrationPageState createState() => _NurseRegistrationPageState();
+  _HRRegistrationPageState createState() => _HRRegistrationPageState();
 }
 
-class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
-  String apiUrl = 'http://192.168.1.3:5000/register_nurse';
+class _HRRegistrationPageState extends State<HRRegistrationPage> {
+  String apiUrl = 'http://192.168.1.5:5000/register_hr';
 
   TextEditingController fullNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
-  TextEditingController dobController = TextEditingController(); // Controller for Date of Birth
-  String selectedNursingType = 'Registered Nurse (RN)';
+  String selectedDepartment = 'Human Resources';
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? emailErrorMessage;
@@ -23,7 +22,7 @@ class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Nurse Registration'),
+        title: Text('HR Registration'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -34,8 +33,7 @@ class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
               _buildFullNameField(),
               _buildEmailField(),
               _buildPhoneNumberField(),
-              _buildDateOfBirthField(), // New Date of Birth field
-              _buildNursingTypeDropdown(),
+              _buildDepartmentDropdown(),
               SizedBox(height: 20.0),
               if (emailErrorMessage != null)
                 Padding(
@@ -46,7 +44,7 @@ class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
                   ),
                 ),
               ElevatedButton(
-                onPressed: _registerNurse,
+                onPressed: _registerHR,
                 child: Text('Register'),
               ),
             ],
@@ -120,70 +118,45 @@ class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
     );
   }
 
-  Widget _buildDateOfBirthField() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: dobController,
-        decoration: InputDecoration(
-          labelText: 'Date of Birth (DD-MM-YYYY)',
-          border: OutlineInputBorder(),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter your date of birth';
-          }
-          // Additional validation logic for date format or age eligibility can be added here
-          return null;
-        },
-      ),
-    );
-  }
-
-  Widget _buildNursingTypeDropdown() {
-    List<String> nursingTypes = [
-      'Registered Nurse (RN)',
-      'Licensed Practical Nurse (LPN)',
-      'Nurse Practitioner (NP)',
-      'Certified Nurse Midwife (CNM)',
-      'Clinical Nurse Specialist (CNS)',
-      'Critical Care Nurse',
-      'Emergency Room (ER) Nurse',
-      'Operating Room (OR) Nurse',
-      'Pediatric Nurse',
-      'Psychiatric-Mental Health Nurse',
+  Widget _buildDepartmentDropdown() {
+    List<String> departments = [
+      'Human Resources',
+      'Recruitment',
+      'Employee Relations',
+      'Benefits Administration',
+      'Training and Development',
+      // Add more HR departments here
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField(
-        value: selectedNursingType,
+        value: selectedDepartment,
         decoration: InputDecoration(
-          labelText: 'Nursing Type',
+          labelText: 'Department',
           border: OutlineInputBorder(),
         ),
-        items: nursingTypes.map((type) {
+        items: departments.map((department) {
           return DropdownMenuItem(
-            value: type,
-            child: Text(type),
+            value: department,
+            child: Text(department),
           );
         }).toList(),
         onChanged: (value) {
           setState(() {
-            selectedNursingType = value.toString();
+            selectedDepartment = value.toString();
           });
         },
       ),
     );
   }
 
-  void _registerNurse() async {
+  void _registerHR() async {
     if (_formKey.currentState!.validate()) {
       Map<String, dynamic> formData = {
         'fullName': fullNameController.text,
         'email': emailController.text,
         'phoneNumber': phoneNumberController.text,
-        'dateOfBirth': dobController.text, // Include Date of Birth in the form data
-        'nursingType': selectedNursingType,
+        'department': selectedDepartment,
       };
 
       String jsonData = jsonEncode(formData);
@@ -197,11 +170,10 @@ class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
 
         if (response.statusCode == 201) {
           Map<String, dynamic> responseBody = jsonDecode(response.body);
-          String nurseId = responseBody['id'];
-
+          String hrId = responseBody['id'];
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Nurse registered successfully with ID: $nurseId'),
+              content: Text('HR registered successfully with ID: $hrId'),
               backgroundColor: Colors.green,
             ),
           );
@@ -212,7 +184,7 @@ class _NurseRegistrationPageState extends State<NurseRegistrationPage> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to register nurse'),
+              content: Text('Failed to register HR'),
               backgroundColor: Colors.black,
             ),
           );

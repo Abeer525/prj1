@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class PatientInfoPage extends StatefulWidget {
   @override
@@ -9,13 +10,14 @@ class PatientInfoPage extends StatefulWidget {
 }
 
 class _PatientInfoPageState extends State<PatientInfoPage> {
-  String apiUrl = 'http://192.168.1.3:5000/api/patients'; // Update with your API URL
+  String apiUrl = 'http://192.168.1.2:5000/api/patients'; // Update with your API URL
 
   TextEditingController nameController = TextEditingController();
   TextEditingController fatherNameController = TextEditingController();
   TextEditingController motherNameController = TextEditingController();
   TextEditingController dobController = TextEditingController();
   String? selectedGender;
+  String? selectedBed;
   TextEditingController maritalStatusController = TextEditingController();
   TextEditingController childrenStatusController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
@@ -69,7 +71,8 @@ class _PatientInfoPageState extends State<PatientInfoPage> {
                 _buildTextField('Phone Number', phoneController, validator: _validateRequired),
                 _buildTextField('Emergency Phone Number', emergencyPhoneController, validator: _validateRequired),
                 _buildTextField('Email', emailController, validator: _validateEmail),
-                _buildTextFieldWithBedSelection('Room Number', roomNumberController, validator: _validateRequired), // Updated room number field
+                // _buildTextFieldWithBedSelection(),
+                _buildTextField('Room Number', roomNumberController), // Updated room number field
                 _buildSectionTitle('Medical Details'),
                 _buildTextField('Medical History', medicalHistoryController),
                 _buildTextField('Reason for Visit', reasonForVisitController),
@@ -137,56 +140,120 @@ class _PatientInfoPageState extends State<PatientInfoPage> {
       ),
     );
   }
+  //
+  // Widget _buildTextFieldWithBedSelection(String label, TextEditingController controller, {String? Function(String?)? validator}) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 8.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         TextFormField(
+  //           controller: controller,
+  //           decoration: InputDecoration(
+  //             labelText: label,
+  //             border: OutlineInputBorder(),
+  //           ),
+  //           validator: validator,
+  //         ),
+  //         SizedBox(height: 12.0), // Add space between text field and radio buttons
+  //         Text(
+  //           'Select Bed:',
+  //           style: TextStyle(
+  //             fontWeight: FontWeight.bold,
+  //           ),
+  //         ),
+  //         Row(
+  //           children: [
+  //             Radio<String>(
+  //               value: 'Bed One',
+  //               groupValue: controller.text,
+  //               onChanged: (value) {
+  //                 setState(() {
+  //                   controller.text = value!;
+  //                 });
+  //               },
+  //             ),
+  //             Text('Bed One'),
+  //             Radio<String>(
+  //               value: 'Bed Two',
+  //               groupValue: controller.text,
+  //               onChanged: (value) {
+  //                 setState(() {
+  //                   controller.text = value!;
+  //                 });
+  //               },
+  //             ),
+  //             Text('Bed Two'),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _buildTextFieldWithBedSelection(String label, TextEditingController controller, {String? Function(String?)? validator}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: label,
-              border: OutlineInputBorder(),
-            ),
-            validator: validator,
-          ),
-          SizedBox(height: 12.0), // Add space between text field and radio buttons
-          Text(
-            'Select Bed:',
+  Widget _buildTextFieldWithBedSelection(String label, String? selectedBed, ValueChanged<String?> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            label,
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
-          Row(
-            children: [
-              Radio<String>(
-                value: 'Bed One',
-                groupValue: controller.text,
-                onChanged: (value) {
-                  setState(() {
-                    controller.text = value!;
-                  });
-                },
-              ),
-              Text('Bed One'),
-              Radio<String>(
-                value: 'Bed Two',
-                groupValue: controller.text,
-                onChanged: (value) {
-                  setState(() {
-                    controller.text = value!;
-                  });
-                },
-              ),
-              Text('Bed Two'),
-            ],
-          ),
-        ],
-      ),
+        ),
+        Row(
+          children: [
+            Radio<String>(
+              value: 'Bed One',
+              groupValue: selectedBed,
+              onChanged: onChanged,
+            ),
+            Text('Bed One'),
+            Radio<String>(
+              value: 'Bed Two',
+              groupValue: selectedBed,
+              onChanged: onChanged,
+            ),
+            Text('Bed Two'),
+          ],
+        ),
+      ],
     );
   }
+
+  // Widget _buildTextFieldWithBedSelection(String label, TextEditingController controller, {String? Function(String?)? validator}) {
+  //   String? selectedBed;
+  //
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 8.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         TextFormField(
+  //           controller: controller,
+  //           decoration: InputDecoration(
+  //             labelText: label,
+  //             border: OutlineInputBorder(),
+  //           ),
+  //           validator: validator,
+  //         ),
+  //         SizedBox(height: 12.0), // Add space between text field and radio buttons
+  //         _buildBedSelection(
+  //           'Select Bed:',
+  //           selectedBed,
+  //               (value) {
+  //             setState(() {
+  //               selectedBed = value;
+  //             });
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildGenderSelection() {
     return Column(
@@ -650,6 +717,8 @@ class _PatientInfoPageState extends State<PatientInfoPage> {
         'phone': phoneController.text,
         'emergencyPhone': emergencyPhoneController.text,
         'email': emailController.text,
+        'roomNumber': roomNumberController.text,
+        'bedType' : selectedBed,
         'medicalHistory': medicalHistoryController.text,
         'reasonForVisit': reasonForVisitController.text,
         'symptoms': symptomsController.text,
@@ -663,7 +732,7 @@ class _PatientInfoPageState extends State<PatientInfoPage> {
         'insurerName': insurerNameController.text,
         'doctorName': doctorNameController.text,
         'additionalComments': additionalCommentsController.text,
-        'roomNumber': roomNumberController.text,
+
         // Include other fields here
       };
 
@@ -717,3 +786,7 @@ class PillInfo {
   TextEditingController quantityController = TextEditingController();
   TextEditingController durationController = TextEditingController();
 }
+
+
+// Example of setting up a numeric input formatter for a controller
+

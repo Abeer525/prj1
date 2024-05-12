@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 // import 'register_nurse.dart'; // Import the RegisterPage widget file
 import 'patient_data.dart';
 import 'nurse_register.dart';
+import 'hr_register.dart';
+import 'login.dart';
+import 'nurse_profile.dart';
+import 'home_nurse.dart';
 void main() {
   runApp(MyApp());
 }
@@ -97,7 +101,14 @@ class MedicalAlertPage extends StatelessWidget {
                         context,
                         // MaterialPageRoute(builder: (context) => RegisterPage()),
                         // MaterialPageRoute(builder: (context) => PatientInfoPage ()),
-                          MaterialPageRoute(builder: (context) => NurseRegistrationPage ()),
+                        //   MaterialPageRoute(builder: (context) => NurseRegistrationPage ()),
+                        //   MaterialPageRoute(builder: (context) => HRRegistrationPage()),
+                        //   MaterialPageRoute(builder: (context) =>   NurseLoginPage()),
+                        //   MaterialPageRoute(builder: (context) =>   ProfilePage(nurseId:'12365')),
+                          MaterialPageRoute(builder: (context) =>   NurseHomePage(fullName: 'abeer',nurseId:"")),
+
+
+
 
                       );
                     },
