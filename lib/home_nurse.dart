@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'patient.dart';
 import 'patient_details.dart';
 import 'nurse_profile.dart';
+import 'package:provider/provider.dart';
+import 'SearchProvider.dart';
 
 class NurseHomePage extends StatefulWidget {
   final String fullName;
@@ -29,14 +31,19 @@ class _NurseHomePageState extends State<NurseHomePage> {
   }
 
   Future<List<Patient>> fetchPatients() async {
-    final url = Uri.parse('http://192.168.1.2:5000/api/patients');
+    final url = Uri.parse('http://192.168.1.10:5000/api/patients');
 
     try {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         List<dynamic> jsonResponse = jsonDecode(response.body);
-        return jsonResponse.map((data) => Patient.fromJson(data)).toList();
+        List<Patient> patients = jsonResponse.map((data) => Patient.fromJson(data)).toList();
+
+        // Set the patients in SearchProvider
+        Provider.of<SearchProvider>(context, listen: false).setPatients(patients);
+
+        return patients;
       } else {
         throw Exception('Failed to load patients - ${response.statusCode}');
       }
@@ -47,6 +54,8 @@ class _NurseHomePageState extends State<NurseHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final searchProvider = Provider.of<SearchProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, ${widget.fullName}'),
@@ -66,49 +75,65 @@ class _NurseHomePageState extends State<NurseHomePage> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Patient>>(
-        future: _futurePatients,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No patients found'));
-          }
-
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final patient = snapshot.data![index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: patient.gender.toLowerCase() == 'male'
-                      ? Colors.blue
-                      : Colors.pink,
-                  child: Icon(
-                    patient.gender.toLowerCase() == 'male'
-                        ? Icons.person
-                        : Icons.person_outline,
-                    color: Colors.white,
-                  ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              onChanged: (value) {
+                searchProvider.filterPatients(value);
+              },
+              decoration: InputDecoration(
+                hintText: 'Search Patients...',
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                title: Text(patient.name),
-                subtitle: Text('Room: ${patient.roomNumber}'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PatientDetailsPage(patient: patient),
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Consumer<SearchProvider>(
+              builder: (context, searchProvider, _) {
+                List<Patient> filteredPatients = searchProvider.filteredPatients;
+
+                if (filteredPatients.isEmpty) {
+                  return Center(child: Text('No patients found'));
+                }
+
+                return ListView.builder(
+                  itemCount: filteredPatients.length,
+                  itemBuilder: (context, index) {
+                    final patient = filteredPatients[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: patient.gender.toLowerCase() == 'male'
+                            ? Colors.blue
+                            : Colors.pink,
+                        child: Icon(
+                          patient.gender.toLowerCase() == 'male'
+                              ? Icons.person
+                              : Icons.person_outline,
+                          color: Colors.white,
+                        ),
+                      ),
+                      title: Text(patient.name),
+                      subtitle: Text('Room: ${patient.roomNumber}'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PatientDetailsPage(patient: patient),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

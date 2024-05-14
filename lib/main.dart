@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
-// import 'register_nurse.dart'; // Import the RegisterPage widget file
+import 'package:provider/provider.dart';
+import 'SearchProvider.dart'; // Import your SearchProvider class
+import 'nurse_profile.dart'; // Import the ProfilePage widget file
+import 'home_nurse.dart'; // Import the NurseHomePage widget file
+import 'package:flutter/material.dart';
 import 'patient_data.dart';
 import 'nurse_register.dart';
 import 'hr_register.dart';
 import 'login.dart';
-import 'nurse_profile.dart';
-import 'home_nurse.dart';
+import 'SearchProvider.dart';
+
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => SearchProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -96,18 +105,20 @@ class MedicalAlertPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate to RegisterPage when button is pressed
+                      // Navigate to NurseHomePage with specific nurse details
                       Navigator.push(
                         context,
-                        // MaterialPageRoute(builder: (context) => RegisterPage()),
-                        // MaterialPageRoute(builder: (context) => PatientInfoPage ()),
-                        //   MaterialPageRoute(builder: (context) => NurseRegistrationPage ()),
-                        //   MaterialPageRoute(builder: (context) => HRRegistrationPage()),
-                          MaterialPageRoute(builder: (context) =>   NurseLoginPage()),
+                        MaterialPageRoute(
 
-                        //   MaterialPageRoute(builder: (context) =>   NurseHomePage(fullName: 'abeer',nurseId:"")),
-
-
+                          builder:
+                              (context) =>    NurseLoginPage()),
+                          //  (context) =>  NurseHomePage(fullName: 'abeer', nurseId: "NS322374"),
+                          //  (context) => RegisterPage()),
+                          //  (context) => PatientInfoPage ()),
+                          //  (context) => NurseRegistrationPage ()),
+                          //  (context) => HRRegistrationPage()),
+                          //  (context) =>   ProfilePage(nurseId:'NS322374')),
+                          //  (context) =>   NurseHomePageState()),
 
 
                       );
@@ -119,8 +130,7 @@ class MedicalAlertPage extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Next'
-                          '',
+                      'Next',
                       style: TextStyle(
                         fontSize: 20.0,
                       ),
@@ -128,7 +138,7 @@ class MedicalAlertPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const  SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
             ]),
           ),
         ],
@@ -136,4 +146,3 @@ class MedicalAlertPage extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'ChangePasswordPage.dart'; // Import ChangePasswordPage
 
 class ProfilePage extends StatefulWidget {
   final String nurseId;
@@ -21,7 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<Map<String, dynamic>> fetchNurseDetails() async {
-    final baseUrl = 'http://192.168.1.2:5000/api/nurse';
+    final baseUrl = 'http://192.168.1.10:5000/api/nurse';
     final List<Future<http.Response>> requests = [
       http.get(Uri.parse('$baseUrl/email/${widget.nurseId}')),
       http.get(Uri.parse('$baseUrl/fullname/${widget.nurseId}')),
@@ -75,6 +76,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text('Full Name: ${nurseDetails?["fullName"]}'),
                 Text('Phone Number: ${nurseDetails?["phoneNumber"]}'),
                 Text('Date of Birth: ${nurseDetails?["dateOfBirth"]}'),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangePasswordPage(customId: widget.nurseId),
+                      ),
+                    );
+                  },
+                  child: Text('Change Password'),
+                ),
               ],
             );
           },

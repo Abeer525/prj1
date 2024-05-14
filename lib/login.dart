@@ -13,7 +13,7 @@ class _NurseLoginPageState extends State<NurseLoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> _login() async {
-    final String apiUrl = 'http://192.168.1.2:5000/login';
+    final String apiUrl = 'http://192.168.1.10:5000/login';
 
     try {
       final response = await http.post(
